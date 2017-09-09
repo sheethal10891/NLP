@@ -10,8 +10,7 @@ def createTokens(path):
 
 def unigram_prep(path):
     words = createTokens(path);
-    print(words)
+    #print(words)
     return sorted(words)
-
     
 #print(unigram_prep('./Project1/SentimentDataset/Dev/neg.txt'))

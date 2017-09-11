@@ -3,7 +3,7 @@ import random
 import nltk
 
 global tokens
-tokens = ngrams.createTokens('./Project1/SentimentDataset/Dev/neg.txt');
+tokens = ngrams.createTokens('./Project1/SentimentDataset/Train/pos.txt');
 
 
 def unigram_sentence(length):
@@ -53,5 +53,5 @@ def bigram_sentence(length,complete_sentence=False,sentence=''):
 
 print unigram_sentence(20)
 
-print bigram_sentence(20, True, "I am who I am")
+print bigram_sentence(20)
 

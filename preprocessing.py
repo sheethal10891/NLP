@@ -1,10 +1,16 @@
 import nltk
 import random
+from decimal import *
+
+from collections import Counter
 
 def createTokens(path):
     lines = open(path).read()
     tokens = nltk.word_tokenize(lines)
-    words = [w.lower() for w in tokens]
+    stopwords = ['...', '/', '\\' , '--']
+    # remove unwanted tokens and add start and end sentence tokens
+    new_words = [word for word in tokens if word not in stopwords]
+    words = [w.lower() for w in new_words]
     return words
 
 def unigram_prep(words):
@@ -12,20 +18,45 @@ def unigram_prep(words):
     #print(words)
     return sorted(words)
 
-def probability_calc(tokens,dictionary,total_tokens):
-    prob_dict={}
+def unigram_prob(tokens):
+    getcontext().prec = 7
+    uni_dict={}
+    length = len(tokens)
     for token in tokens:
-        prob_dict[token]=dictionary[token]/total_tokens
-    return prob_dict
+	if token not in uni_dict:
+	  uni_dict[token] = 1
+	else:
+	  uni_dict[token] += 1
+      
+    uni_prob ={}
+    for t in uni_dict:
+        uni_prob[t] = Decimal(uni_dict[t])/Decimal(length)
+    print(length)
+    return uni_prob
+    
+    
+def bigram_prob(bi_dict):
+    getcontext().prec = 7
+    bi_prob = {}
+    for t in bi_dict :
+        bi_prob[t] ={}
+        for word in bi_dict[t]:
+            if word not in bi_prob[t]:
+	  			bi_prob[t][word] = 1
+            else:
+	  			bi_prob[t][word] += 1
+                  
+    for token in bi_prob:
+        for w in bi_prob[token]:
+            bi_prob[token][w] = Decimal(bi_prob[token][w])/Decimal(len(bi_prob[token]))
+            
+    return bi_prob
+        
 
 #Get  the next probable word for a token
 def predict_next(bigram_dict,start_word):
-    ##TODO: write logic to get the word with max probability
     word_map = bigram_dict[start_word]
-    #print(len(word_map))
     rn=random.randint(0,len(word_map)-1)
-    #print(" Random")
-    #print(rn)
     word=word_map[rn]
     return word
 

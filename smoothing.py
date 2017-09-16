@@ -13,6 +13,8 @@ def unigramLaplaceSmoothing():
         for t in dev_tokens:
             if t not in uni_prob_test:
                 uni_prob_test[t] = (Decimal(1.0) + Decimal(unidict.get(t, 0)))/ Decimal(2*length);
+                
+        #print(uni_prob_test)
     
     
 unigramLaplaceSmoothing()

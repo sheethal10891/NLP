@@ -3,15 +3,16 @@ from decimal import *
 
 
 train_tokens = ngrams.createTokens('./Project1/SentimentDataset/Train/pos.txt');
-dev_tokens = ngrams.createTokens('./Project1/SentimentDataset/Train/pos.txt');
+dev_tokens = ngrams.createTokens('./Project1/SentimentDataset/Dev/pos.txt');
 
 def unigramLaplaceSmoothing():
         getcontext().prec = 7
-        length = len(tokens)
-    	unidict=ngrams.unigram_dict(train_tokens)
-    	bidict=ngrams.get_bigrams(train_tokens)
+        length = len(train_tokens)
+        unidict=ngrams.unigram_dict(train_tokens)
         uni_prob_test ={}
         for t in dev_tokens:
             if t not in uni_prob_test:
-      			uni_prob_test[t] = (1.0 + Decimal(unidict[t]))/ Decimal(2*length);
+                uni_prob_test[t] = (Decimal(1.0) + Decimal(unidict.get(t, 0)))/ Decimal(2*length);
     
+    
+unigramLaplaceSmoothing()

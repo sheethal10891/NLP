@@ -22,10 +22,10 @@ def unigram_dict(tokens):
     uni_dict={}
     length = len(tokens)
     for token in tokens:
-    if token not in uni_dict:
-      uni_dict[token] = 1
-    else:
-      uni_dict[token] += 1
+        if token not in uni_dict:
+            uni_dict[token] = 1
+        else:
+            uni_dict[token] += 1
     
     return uni_dict
 
@@ -46,9 +46,9 @@ def bigram_prob(bi_dict):
         bi_prob[t] ={}
         for word in bi_dict[t]:
             if word not in bi_prob[t]:
-	  			bi_prob[t][word] = 1
+                bi_prob[t][word] = 1
             else:
-	  			bi_prob[t][word] += 1
+                bi_prob[t][word] += 1
                   
     for token in bi_prob:
         for w in bi_prob[token]:
@@ -63,13 +63,6 @@ def predict_next(bigram_dict,start_word):
     rn=random.randint(0,len(word_map)-1)
     word=word_map[rn]
     return word
-
-def get_biprob(bigram_dict,num_bigrams):
-     prob_dict={}
-     for token in bigram_dict.keys():
-        for  next in bigram_dict[token].keys():
-	    prob_dict[token][next] = bigram[token][next] /len(bigram[token].keys())    
-     return prob_dict
 
 ## Build dictionary of bigrams  
 def get_bigrams(tokens):

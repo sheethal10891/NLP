@@ -3,6 +3,7 @@ import random
 from decimal import *
 
 from collections import Counter
+from collections import defaultdict
 
 def createTokens(path):
     lines = open(path).read()
@@ -18,7 +19,7 @@ def unigram_prep(words):
     #print(words)
     return sorted(words)
 
-def unigram_dict(tokens):
+def build_unidict(tokens):
     uni_dict={}
     length = len(tokens)
     for token in tokens:
@@ -65,10 +66,11 @@ def predict_next(bigram_dict,start_word):
     return word
 
 ## Build dictionary of bigrams  
-def get_bigrams(tokens):
-    bigram_dict={}
+def build_bidict(tokens):
+    bigram_dict= defaultdict(dict)
     for i in range(0,len(tokens)-1):
-            bigram_dict.setdefault(tokens[i],[]).append(tokens[i+1])
+	bigram_dict.setdefault(tokens[i],{}).update([(tokens[i],tokens[i+1])])
+#    print bigram_dict
     return bigram_dict
 
 ## Random sentence generator bigrams 

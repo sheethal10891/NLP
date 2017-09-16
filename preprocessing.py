@@ -18,20 +18,24 @@ def unigram_prep(words):
     #print(words)
     return sorted(words)
 
-def unigram_prob(tokens):
-    getcontext().prec = 7
+def unigram_dict(tokens):
     uni_dict={}
     length = len(tokens)
     for token in tokens:
-	if token not in uni_dict:
-	  uni_dict[token] = 1
-	else:
-	  uni_dict[token] += 1
-      
+    if token not in uni_dict:
+      uni_dict[token] = 1
+    else:
+      uni_dict[token] += 1
+    
+    return uni_dict
+
+def unigram_prob(tokens):
+    length = len(tokens)
+    getcontext().prec = 7
+    uni_dict=unigram_dict(tokens)
     uni_prob ={}
     for t in uni_dict:
         uni_prob[t] = Decimal(uni_dict[t])/Decimal(length)
-    print(length)
     return uni_prob
     
     

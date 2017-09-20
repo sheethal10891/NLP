@@ -69,7 +69,12 @@ def predict_next(bigram_dict,start_word):
 def build_bidict(tokens):
     bigram_dict= defaultdict(dict)
     for i in range(0,len(tokens)-1):
-	bigram_dict.setdefault(tokens[i],{}).update([(tokens[i],tokens[i+1])])
+#	if tokens[i] in bigram_dict.keys():
+           if tokens[i+1] in bigram_dict[tokens[i]]:
+	       bigram_dict[tokens[i]][tokens[i+1]]+=1;
+	   else:
+	       bigram_dict[tokens[i]][tokens[i+1]]=1;
+         		
 #    print bigram_dict
     return bigram_dict
 

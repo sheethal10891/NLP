@@ -13,10 +13,12 @@ import preprocessing as ngrams
 train_tokens = ngrams.createTokens('./Project1/SentimentDataset/Train/pos.txt');
 train_tokens_neg = ngrams.createTokens('./Project1/SentimentDataset/Train/neg.txt');
 dev_tokens = ngrams.createTokens('./Project1/SentimentDataset/Test/test.txt');
+#dev_tokens = ngrams.createTokens('./Project1/SentimentDataset/Dev/pos.txt');
 #dev_tokens = ngrams.createTokens('./Project1/SentimentDataset/Dev/neg.txt');
-dev_tokens = ngrams.createTokens('./Project1/SentimentDataset/Dev/neg.txt');
 
-def unigramSmoothing(tokens,k=1):
+
+## LAPLACE && K_SMOOTHING
+def unigramLaplaceSmoothing(tokens,k=1):
         getcontext().prec = 7
         length = len(tokens)
         unidict=ngrams.build_unidict(tokens)
@@ -52,6 +54,7 @@ def bigramLaplaceSmoothing(train_tokens,k=1):
 #   	    print (key, value)
         return bi_prob_test
 
+##PERPLEXITY
 def uni_perplexity():
     length_dev =  len(dev_tokens)
     uni_prob_dev = unigramLaplaceSmoothing(train_tokens,0.6)
@@ -70,13 +73,83 @@ def bi_perplexity():
         logSum = Decimal(logSum + Decimal(math.log(bi_prob_dev[first_word][second_word])));
     print math.exp(Decimal( -logSum/length_dev))
     
+##KNESER-NEY
+def unigram_KNSmoothing(tokens,delta=1):
+        getcontext().prec = 7
+        length = len(tokens)
+        unidict=ngrams.build_unidict(tokens)
+        uni_prob_test ={}
+        for t in dev_tokens:
+            if t not in uni_prob_test:
+                uni_prob_test[t] = (Decimal(1.0*delta) + Decimal(unidict.get(t, 0)))/ Decimal(length+(len(unidict)*delta));
+
+        return uni_prob_test
+
+def bigram_KNSmoothing(train_tokens,delta=1):
+        getcontext().prec = 7
+        length = len(train_tokens)
+        unidict= ngrams.build_unidict(train_tokens)
+        bidict=defaultdict(dict)
+        bidict=ngrams.build_bidict(train_tokens)
+        bi_prob_test = defaultdict(dict)
+        x= Decimal(1.0*delta)
+        bi_len=len(bidict)
+        for i in range(0,len(dev_tokens)-1):
+            if dev_tokens[i] in bidict.keys():
+	        if dev_tokens[i+1] in bidict[dev_tokens[i]]:
+                    bi_prob_test[dev_tokens[i]][dev_tokens[i+1]] = (x + Decimal(bidict[dev_tokens[i]][dev_tokens[i+1]]))/\
+									Decimal(bi_len*delta + unidict[dev_tokens[i]])
+                else:
+		    z=unidict[dev_tokens[i]]
+        	    y= x/Decimal((bi_len*delta+z))
+		    bi_prob_test[dev_tokens[i]][dev_tokens[i+1]] = y
+	    else:
+                bi_prob_test[dev_tokens[i]][dev_tokens[i+1]] = Decimal(1.0) / Decimal(len(unidict)*delta)
+
+#        for key,value in bi_prob_test.items():
+#   	    print (key, value)
+        return bi_prob_test
+
+def perplexityUsingPositiveBigrams(string1):
+    #string1 = '<start> ' + string1 + ' <end>'
+    string1 = string1.translate(str.maketrans('','',string.punctuation))
+    
+    string1 = '<start> ' + string1
+    strList = string1.split()
+    n = len(strList)-1
+    
+    perplexityValue = 0
+    
+    #unseen = false
+    for i in range(1, len(strList)):
+        #print(strList[i-1],':', strList[i])
+        k1 = strList[i-1]
+        k2 = strList[i]
+        numerator = 1
+        denominator = 1
+        if k1 in positive_bigramCounts and k2 in positive_bigramCounts[k1]:
+            if positive_bigramCounts[k1][k2] > 2:
+                numerator = positive_bigramCounts[k1][k2] - 0.75
+            elif positive_bigramCounts[k1][k2] == 1:
+                numerator = positive_bigramCounts[k1][k2] - 0.5
+            
+            if k1 in positive_unigramCounts:
+                denominator = positive_unigramCounts[k1]
+            else:
+                denominator = positive_unigramCounts['unk']
+            perplexityValue += math.log(numerator/denominator)
+        else:
+            perplexityValue += math.log(positive_ksmoothing(k1, k2))
+
+
+
 def uni_classify():
     val =0
     print("abc" ,val )
     uni_prob_pos = unigramLaplaceSmoothing(train_tokens,0.9)
     uni_prob_neg = unigramLaplaceSmoothing(train_tokens_neg,0.9)
     i=1;
-    file = open('test.csv','wt')
+    file = open('unitest.csv','wt')
     writer = csv.writer(file)
     with open('./Project1/SentimentDataset/Test/test.txt') as f:
         for line in f:
@@ -105,7 +178,7 @@ def bi_classify():
     bi_prob_pos = bigramLaplaceSmoothing(train_tokens,0.9)
     bi_prob_neg = bigramLaplaceSmoothing(train_tokens_neg,0.9)
     j=1;
-    file = open('test.csv','wt')
+    file = open('bitest.csv','wt')
     writer = csv.writer(file)
     with open('./Project1/SentimentDataset/Test/test.txt') as f:
         for line in f:
@@ -127,14 +200,9 @@ def bi_classify():
 	file.close()
 
 
-#bi_classify()
-uni_classify()
+bi_classify()
+#uni_classify()
 #uni_perplexity()
 #bi_perplexity()
-#bigramLaplaceSmoothing()
-#uni_perplexity()
-#bi_perplexiy()
-#uni_perplexity()
-#unigramSmoothing()
 
 

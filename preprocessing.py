@@ -20,7 +20,7 @@ def unigram_prep(words):
     return sorted(words)
 
 def build_unidict(tokens):
-    uni_dict={}
+    uni_dict={"UNK":0}
     length = len(tokens)
     for token in tokens:
         if token not in uni_dict:
@@ -29,6 +29,13 @@ def build_unidict(tokens):
             uni_dict[token] += 1
     
     return uni_dict
+
+def add_unknowns(idict):
+    count =0  
+    for token in idict:
+        if (idict[token] == 1):
+         count+=1 
+    idict['UNK']=count
 
 def unigram_prob(tokens):
     length = len(tokens)

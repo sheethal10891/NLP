@@ -13,6 +13,7 @@ import preprocessing as ngrams
 train_tokens = ngrams.createTokens('./Project1/SentimentDataset/Train/pos.txt');
 train_tokens_neg = ngrams.createTokens('./Project1/SentimentDataset/Train/neg.txt');
 dev_tokens = ngrams.createTokens('./Project1/SentimentDataset/Test/test.txt');
+#dev_tokens = ngrams.createTokens('./Project1/SentimentDataset/Dev/neg.txt');
 
 def unigramLaplaceSmoothing(tokens,k=1):
         getcontext().prec = 7
@@ -25,26 +26,26 @@ def unigramLaplaceSmoothing(tokens,k=1):
 
         return uni_prob_test
 
-def bigramLaplaceSmoothing(train_tokens):
+def bigramLaplaceSmoothing(train_tokens,k=1):
         getcontext().prec = 7
         length = len(train_tokens)
         unidict= ngrams.build_unidict(train_tokens)
         bidict=defaultdict(dict)
         bidict=ngrams.build_bidict(train_tokens)
         bi_prob_test = defaultdict(dict)
-        x= Decimal(1.0)
+        x= Decimal(1.0*k)
         bi_len=len(bidict)
         for i in range(0,len(dev_tokens)-1):
             if dev_tokens[i] in bidict.keys():
 	        if dev_tokens[i+1] in bidict[dev_tokens[i]]:
                     bi_prob_test[dev_tokens[i]][dev_tokens[i+1]] = (x + Decimal(bidict[dev_tokens[i]][dev_tokens[i+1]]))/\
-									Decimal(bi_len + unidict[dev_tokens[i]])
+									Decimal(bi_len*k + unidict[dev_tokens[i]])
                 else:
 		    z=unidict[dev_tokens[i]]
-        	    y= x/Decimal(bi_len+z)
+        	    y= x/Decimal((bi_len*k+z))
 		    bi_prob_test[dev_tokens[i]][dev_tokens[i+1]] = y
 	    else:
-                bi_prob_test[dev_tokens[i]][dev_tokens[i+1]] = Decimal(1.0) / Decimal(len(unidict))
+                bi_prob_test[dev_tokens[i]][dev_tokens[i+1]] = Decimal(1.0) / Decimal(len(unidict)*k)
 
 #        for key,value in bi_prob_test.items():
 #   	    print (key, value)
@@ -52,17 +53,15 @@ def bigramLaplaceSmoothing(train_tokens):
 
 def uni_perplexity():
     length_dev =  len(dev_tokens)
-    uni_prob_dev = unigramLaplaceSmoothing(train_tokens,0.99)
+    uni_prob_dev = unigramLaplaceSmoothing(train_tokens,0.6)
     logSum =0;
     for t in dev_tokens:
         logSum = Decimal(logSum + Decimal(math.log(uni_prob_dev[t])));
     print math.exp(Decimal( -logSum/length_dev))
 
-
-
 def bi_perplexity():
     length_dev = len(dev_tokens)
-    bi_prob_dev = bigramLaplaceSmoothing(train_tokens)
+    bi_prob_dev = bigramLaplaceSmoothing(train_tokens,0.01)
     logSum =0;
     for i in range(1,length_dev):
         first_word = dev_tokens[i-1];
@@ -73,8 +72,8 @@ def bi_perplexity():
 def uni_classify():
     val =0
     print("abc" ,val )
-    uni_prob_pos = unigramLaplaceSmoothing(train_tokens,0.99)
-    uni_prob_neg = unigramLaplaceSmoothing(train_tokens_neg,0.99)
+    uni_prob_pos = unigramLaplaceSmoothing(train_tokens,0.9)
+    uni_prob_neg = unigramLaplaceSmoothing(train_tokens_neg,0.9)
     i=1;
     file = open('test.csv','wt')
     writer = csv.writer(file)
@@ -91,7 +90,7 @@ def uni_classify():
                 neg_prob += math.log(uni_prob_neg[t])
 #            print("positive" , -pos_prob)
 #            print("negative" , -neg_prob)
-            if pos_prob<neg_prob:
+            if pos_prob>neg_prob:
 		writer.writerow( (i,0) )
                 #file.write(i ,',',0);
             else :
@@ -103,8 +102,8 @@ def uni_classify():
 def bi_classify():
     val =0
     print("abc" ,val )
-    bi_prob_pos = bigramLaplaceSmoothing(train_tokens)
-    bi_prob_neg = bigramLaplaceSmoothing(train_tokens_neg)
+    bi_prob_pos = bigramLaplaceSmoothing(train_tokens,0.9)
+    bi_prob_neg = bigramLaplaceSmoothing(train_tokens_neg,0.9)
     j=1;
     file = open('test.csv','wt')
     writer = csv.writer(file)
@@ -128,7 +127,7 @@ def bi_classify():
 	file.close()
 
 
-bi_classify()
-
-uni_perplexity()
-bi_perplexity()
+#bi_classify()
+uni_classify()
+#uni_perplexity()
+#bi_perplexity()

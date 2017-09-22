@@ -1,9 +1,11 @@
 import multiprocessing
 import nltk
+from sklearn.naive_bayes import GaussianNB
 from gensim.models.word2vec import LineSentence
 from gensim.models.word2vec import Word2Vec
 import numpy as np
 from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 
 files_list = open('./Project1/SentimentDataset/Train/pos.txt', 'r').readlines()
@@ -43,7 +45,6 @@ for line in lines1 :
     i=i+1;
 
 
-
 lines2=[nltk.word_tokenize(sen) for sen in files_list2] 
 i=0;
 neg_feature_array= np.zeros((len(files_list2),50))
@@ -62,7 +63,9 @@ Y=np.append(np.ones((len(pos_feature_array),1), dtype=np.int),np.zeros((len(neg_
 print "Y Shape"
 print Y.shape
 
+stopwords = ['...', '/', '\\' , '--']
 lines_test=[nltk.word_tokenize(sen) for sen in files_list3] 
+
 
 i=0;
 test_feature_array= np.zeros((len(files_list3),50))
@@ -78,7 +81,10 @@ print neg_feature_array[0]
 X_test = test_feature_array
 
 
-clf = svm.SVC()
+#clf = svm.SVC()
+clf = GaussianNB()
+## RANDOM FOREST
+#clf= RandomForestClassifier(n_estimators=10)
 clf.fit(X, Y)
 
 yTe=clf.predict(X_test)
@@ -86,10 +92,10 @@ print yTe[1]
 
 
 
-
-
 n = yTe.shape[0]
-indices = np.array(list(range(n)))
+x = np.array(list(range(n+1)))
+exclude =[0]
+indices = [i for i in x if i not in exclude]
 df = pd.DataFrame(data={'Id':indices, 'Prediction':yTe})
 df = df[['Id', 'Prediction']]
 df.to_csv('./WordEmbeddingTest.csv', header=True, index=False)

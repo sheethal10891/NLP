@@ -14,8 +14,9 @@ train_tokens = ngrams.createTokens('./Project1/SentimentDataset/Train/pos.txt');
 train_tokens_neg = ngrams.createTokens('./Project1/SentimentDataset/Train/neg.txt');
 dev_tokens = ngrams.createTokens('./Project1/SentimentDataset/Test/test.txt');
 #dev_tokens = ngrams.createTokens('./Project1/SentimentDataset/Dev/neg.txt');
+dev_tokens = ngrams.createTokens('./Project1/SentimentDataset/Dev/neg.txt');
 
-def unigramLaplaceSmoothing(tokens,k=1):
+def unigramSmoothing(tokens,k=1):
         getcontext().prec = 7
         length = len(tokens)
         unidict=ngrams.build_unidict(tokens)
@@ -92,7 +93,6 @@ def uni_classify():
 #            print("negative" , -neg_prob)
             if pos_prob>neg_prob:
 		writer.writerow( (i,0) )
-                #file.write(i ,',',0);
             else :
                 writer.writerow( (i,1) )
             i=i+1
@@ -131,3 +131,10 @@ def bi_classify():
 uni_classify()
 #uni_perplexity()
 #bi_perplexity()
+#bigramLaplaceSmoothing()
+#uni_perplexity()
+#bi_perplexiy()
+#uni_perplexity()
+#unigramSmoothing()
+
+

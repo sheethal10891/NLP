@@ -85,6 +85,11 @@ def build_bidict(tokens):
 #    print bigram_dict
     return bigram_dict
 
+def get_bigrams(tokens):         
+      bigram_dict={}           
+      for i in range(0,len(tokens)-1):           
+             bigram_dict.setdefault(tokens[i],[]).append(tokens[i+1])       
+      return bigram_dict
 ## Random sentence generator bigrams 
 ## Input: max len of sentence,Initial unigram tokens,optional sentence start tokens
 

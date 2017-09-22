@@ -74,37 +74,34 @@ def bi_perplexity():
     print math.exp(Decimal( -logSum/length_dev))
     
 ##KNESER-NEY
-def unigram_KNSmoothing(tokens,delta=1):
-        getcontext().prec = 7
-        length = len(tokens)
-        unidict=ngrams.build_unidict(tokens)
-        uni_prob_test ={}
-        for t in dev_tokens:
-            if t not in uni_prob_test:
-                uni_prob_test[t] = (Decimal(1.0*delta) + Decimal(unidict.get(t, 0)))/ Decimal(length+(len(unidict)*delta));
 
-        return uni_prob_test
-
-def bigram_KNSmoothing(train_tokens,delta=1):
+def KNSmoothing(train_tokens,delta=1):
         getcontext().prec = 7
         length = len(train_tokens)
         unidict= ngrams.build_unidict(train_tokens)
         bidict=defaultdict(dict)
         bidict=ngrams.build_bidict(train_tokens)
-        bi_prob_test = defaultdict(dict)
         x= Decimal(1.0*delta)
         bi_len=len(bidict)
+        bi_prob_test=defaultdict(dict)
+        
         for i in range(0,len(dev_tokens)-1):
-            if dev_tokens[i] in bidict.keys():
-	        if dev_tokens[i+1] in bidict[dev_tokens[i]]:
-                    bi_prob_test[dev_tokens[i]][dev_tokens[i+1]] = (x + Decimal(bidict[dev_tokens[i]][dev_tokens[i+1]]))/\
-									Decimal(bi_len*delta + unidict[dev_tokens[i]])
+            t1= dev_tokens[i]
+            t2=dev_token[i+1]
+            if t1 in bidict.keys() and t2 in bidict[t1]:
+                if bidict[t1][t2] > 2:
+                    numerator = bidict[t1][t2] - 0.75
+                elif bidict[t1][t2]==1:
+                    numerator = bidict[t1][t2] -0.5
+
+                if t1 in unidict.keys():
+                    denominator = unidict[t1]
                 else:
-		    z=unidict[dev_tokens[i]]
-        	    y= x/Decimal((bi_len*delta+z))
-		    bi_prob_test[dev_tokens[i]][dev_tokens[i+1]] = y
-	    else:
-                bi_prob_test[dev_tokens[i]][dev_tokens[i+1]] = Decimal(1.0) / Decimal(len(unidict)*delta)
+                    denominator = unidict['UNK']
+            else:
+                numerator = 1
+                denominator = len(unidict)
+            bi_prob_test[t1][t2]=numerator/denominator
 
 #        for key,value in bi_prob_test.items():
 #   	    print (key, value)

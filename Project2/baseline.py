@@ -1,5 +1,6 @@
 import re
 import csv
+import random
 from collections import defaultdict
 
 def createLexicon(path):
@@ -25,17 +26,21 @@ def test(lex,path):
     n=len(lines)
   
     tag_dict=defaultdict(list)
+    noun_tags=["NNPS","NNP"]
+    tags=["PER","LOC","MISC","ORG"]
 
     for i in xrange(0,n,3):
         tokens=lines[i].split()
+        pos=lines[i+1].split()
 	numbers=lines[i+2].split()
         token_len=len(tokens)
 	for j in range(0,token_len-1):
-	    if tokens[j] in lex: 
-		tag=lex[tokens[j]]
-		tag_dict[tag].append(int(numbers[j]))
-	    else:
-		tag_dict['MISC'].append(int(numbers[j]))
+            if pos[j] in noun_tags:
+	       if tokens[j] in lex: 
+		   tag=lex[tokens[j]]
+		   tag_dict[tag].append(int(numbers[j]))
+	       else:
+		   tag_dict[random.choice(tags)].append(int(numbers[j]))
    
     for key in tag_dict: 
         length=len(tag_dict[key])

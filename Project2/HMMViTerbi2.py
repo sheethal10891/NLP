@@ -6,18 +6,18 @@ from collections import defaultdict
 
 tags=["B-LOC","B-PER","B-ORG","B-MISC", "I-LOC","I-PER","I-ORG","I-MISC","O"]
 tags2=["PER","LOC","MISC","ORG","O"]
-
 tags5=["B-LOC","B-PER","B-ORG","B-MISC", "I-LOC","I-PER","I-ORG","I-MISC"]
 
 tags3=["PER","LOC","MISC","ORG"]
+noun_tags=["NNPS","NNP"]
+tags4=["B-LOC","B-PER","B-ORG","B-MISC"]
 #tags2=["PER","LOC","MISC","ORG"]
 
 
 alllines = open('./train.txt').readlines();
-testSet=open('./test.txt').readlines();
-
 Ptrain=alllines[:29400]
 Pval=alllines[29400:] 
+testSet=open('./test.txt').readlines();
 
 
 def getEmissionProb(train):
@@ -28,8 +28,8 @@ def getEmissionProb(train):
         biotags=train[i].split()
         words=train[i-2].split()
         for j in range(len(biotags)):
-            if biotags[j][2:] in tags2:
-            	tag=biotags[j][2:]
+            if biotags[j] in tags:
+            	tag=biotags[j]
             else :
                 tag="O"
             if words[j] not in emcount:
@@ -58,12 +58,12 @@ def getTransitionProb(train):
     for i in xrange(2,n,3):
         biotags=train[i].split()
         for j in range(len(biotags)-1):
-            if biotags[j][2:] in tags2:
-                tag=biotags[j][2:]
+            if biotags[j] in tags:
+                tag=biotags[j]
             else :
                 tag="O"
-            if biotags[j+1][2:] in tags2:
-                tag2=biotags[j+1][2:]
+            if biotags[j+1] in tags:
+                tag2=biotags[j+1]
             else :
                 tag2="O"
             if tag not in transCount:
@@ -88,57 +88,83 @@ def getTransitionProb(train):
 
 def viterbi(train,test):
     TP=getTransitionProb(train);
+    
     EP=getEmissionProb(train);
-    print EP['on']
+    print TP['B-ORG']
     TP['START']={}
-    TP['START']['ORG']=0.2
-    TP['START']['LOC']=0.2
-    TP['START']['MISC']=0.2
-    TP['START']['PER']=0.2
-    TP['START']['O']=0.2
+    TP['START']['B-ORG']=1.1
+    TP['START']['B-LOC']=1.1
+    TP['START']['B-MISC']=1.1
+    TP['START']['B-PER']=1.1
+    TP['START']['I-ORG']=1.1
+    TP['START']['I-LOC']=1.1
+    TP['START']['I-MISC']=1.1
+    TP['START']['I-PER']=1.1
+    TP['START']['O']=1.1
     n=len(test)
     tagged=[]#[None] * n/3
     # add start transition probability - add a start tag and do this properly!
-    j=0;
+  
     
     for i in xrange(0,n,3):
         
         words=test[i].split()
+        postags=test[i+1].split()
         prevBestProb=1
         prevBestTag="START"
         besttagseq=[]
-        for word in words:
+        for j in range(len(words)):
             bestprob=0;
             besttag="O"
-            for tag in tags2:
+            for tag in tags:
                 #print TP[prevBestTag][tag]
                 
                 #print word
                 #print EP[word]
-                if word not in EP:
+                if words[j] not in EP:
                     emmprob=0;
-                elif  tag not in EP[word]:
+                elif  tag not in EP[words[j]]:
                     emmprob=0
                 else:
-                    emmprob= EP[word][tag]
+                    emmprob= EP[words[j]][tag]
+                    
+                if prevBestTag not in TP:
+                    tranprob=0;
+                elif  tag not in TP[prevBestTag]:
+                    tranprob=0
+                else:
+                    tranprob= TP[prevBestTag][tag]
                     
                 #if emmprob>0:
                     #print emmprob
-                currprob=Decimal(prevBestProb)*Decimal(TP[prevBestTag][tag])*Decimal(emmprob);
+                #print prevBestTag
+                #print    TP[prevBestTag][tag]
+                currprob=Decimal(prevBestProb)*Decimal(tranprob)*Decimal(emmprob);
                 if bestprob < currprob:
                     bestprob=currprob
                     besttag=tag
                     #print besttag
+                
             prevBestProb=bestprob
-            prevBesttag=besttag
+            prevBestTag=besttag
             if bestprob==0:
                 prevBestProb=1
-                prevBesttag='O'
-            
-            besttagseq.append(besttag);
+                prevBestTag='O'
+            '''    
+            if postags[j] in noun_tags:
+                
+                if prevBestTag not in tags5:
+                    #print prevBestTag
+                    besttag=random.choice(tags4)
+                    prevBestTag=besttag
+            '''        
+            tagToAppend='O'
+            if(len(besttag) > 2):
+                tagToAppend=besttag[2:]
+            besttagseq.append(tagToAppend);
         tagged.append(besttagseq)
         #print(len(tagged))
-        j=j+1;
+        #j=j+1;
     return tagged    
     #createsubmission(tagged)    
 
@@ -150,6 +176,7 @@ def createsubmission(tagged):
     finalSub['LOC']=[]
     finalSub['O']=[]
     count =0
+    print tagged[0]
     for i in range(len(tagged)):
         next=tagged[i][0]
         start=count;
@@ -167,7 +194,7 @@ def createsubmission(tagged):
         #break;
         #print tagged[i]
     print count
-    with open('hmmviterbi.csv','wt') as file:
+    with open('hmmviterbi2.csv','wt') as file:
         w = csv.writer(file,delimiter=" ")
         w.writerow(["Type","Prediction"])
         for key, value in finalSub.items():
@@ -181,10 +208,9 @@ def createblocks(start,end):
     #print str(start)+"-"+str(end)
     return str(start)+"-"+str(end)
     
-            
+  
 def calculatePrecision():
     tagged=viterbi(Ptrain,Pval)
-    print tagged[0]
     nVal=len(Pval)
     correct=0
     predicted=0
@@ -217,7 +243,8 @@ def calculatePrecision():
     fMeasure=2*precision*recall/(precision+recall)
     print precision
     print recall
-    print fMeasure    
+    print fMeasure
+    
     
     
 #print viterbi();    
@@ -225,7 +252,8 @@ def calculatePrecision():
         
     
 #getEmissionProb(alllines);
-#viterbi(testSet);
+#viterbi(alllines,testSet);
+
 calculatePrecision();
 
    

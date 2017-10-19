@@ -60,7 +60,7 @@ alllines = open('./train.txt').readlines();
 n=len(alllines)
 train=alllines[:29400]
 val=alllines[29400:] 
-calculatePrecision()
+
     
 #createLexicon('./train.txt');
 
@@ -114,3 +114,4 @@ def test(lex,path):
         file.close()
 
 #test(lex,'test.txt')
+#calculatePrecision()

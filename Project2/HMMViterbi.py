@@ -32,19 +32,26 @@ def getEmissionProb(train):
             	tag=biotags[j][2:]
             else :
                 tag="O"
-            if words[j] not in emcount:
-                emcount[words[j]]={}
-                emprob[words[j]]={}
-                emcount[words[j]]["count"]=0
-            if tag in emcount[words[j]]:
-            	emcount[words[j]][tag]+=1
-                emcount[words[j]]["count"]+=1
-                emprob[words[j]][tag]=Decimal(emcount[words[j]][tag])/Decimal(emcount[words[j]]["count"])
+            word=words[j]#.lower();  
+            if word=="on" :
+                
+                if tag =="PER":
+                    print words
+                    print "here"
+                    print i
+            if word not in emcount:
+                emcount[word]={}
+                emprob[word]={}
+                emcount[word]["count"]=0
+            if tag in emcount[word]:
+            	emcount[word][tag]+=1
+                emcount[word]["count"]+=1
+                emprob[word][tag]=Decimal(emcount[word][tag])/Decimal(emcount[word]["count"])
             else:
-               	emcount[words[j]][tag]=1
-                emcount[words[j]]["count"]+=1
+               	emcount[word][tag]=1
+                emcount[word]["count"]+=1
                 #print  Decimal(1)/Decimal(emcount[words[j]]["count"])
-                emprob[words[j]][tag]=Decimal(1)/Decimal(emcount[words[j]]["count"])
+                emprob[word][tag]=Decimal(1)/Decimal(emcount[word]["count"])
     
     #print emprob['on']
     return emprob
@@ -107,7 +114,8 @@ def viterbi(train,test):
         prevBestProb=1
         prevBestTag="START"
         besttagseq=[]
-        for word in words:
+        for word1 in words:
+            word=word1#.lower();  
             bestprob=0;
             besttag="O"
             for tag in tags2:
@@ -139,8 +147,9 @@ def viterbi(train,test):
         tagged.append(besttagseq)
         #print(len(tagged))
         j=j+1;
-    return tagged    
-    #createsubmission(tagged)    
+       
+    createsubmission(tagged)
+    return tagged
 
 def createsubmission(tagged):
     finalSub={}
@@ -167,7 +176,7 @@ def createsubmission(tagged):
         #break;
         #print tagged[i]
     print count
-    with open('hmmviterbi.csv','wt') as file:
+    with open('hmmviterbilow2.csv','wt') as file:
         w = csv.writer(file,delimiter=" ")
         w.writerow(["Type","Prediction"])
         for key, value in finalSub.items():
@@ -224,8 +233,8 @@ def calculatePrecision():
         
         
     
-#getEmissionProb(alllines);
-#viterbi(testSet);
-calculatePrecision();
+
+#viterbi(alllines,testSet);
+#calculatePrecision();
 
    

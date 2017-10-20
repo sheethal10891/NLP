@@ -10,7 +10,8 @@ Uncomment viterbi() to generated tags for testset
 Uncomment calculatePrecision() to calculate the 3 scores
 
 # CRF
-
+Uncomment predict(test_file) to run the CRF on test set
+Uncomment prf_scores() to calculate the prf scores
 
 #NOTE: All 3 above contain only one version of the experiment of the many experiments done with the model
 

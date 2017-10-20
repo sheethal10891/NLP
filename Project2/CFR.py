@@ -244,7 +244,7 @@ def prf_scores(pTrain,pVal):
     print recall
     print fMeasure
 
-prf_scores(pTrain,pVal)    
+#prf_scores(pTrain,pVal)    
    
 '''
     

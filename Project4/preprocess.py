@@ -75,6 +75,7 @@ if __name__ == '__main__':
     # add the 3 words to the start of the list
     vocab = [unk, s_start, s_end] + vocab
 
+    print(len(vocab))
     # build inverse vocabulary
     # i.e. if vocab[17] = 'cat', then inv_vocab['cat'] = 17
     inv_vocab = {w: k for k, w in enumerate(vocab)}

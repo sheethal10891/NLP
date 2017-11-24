@@ -1,0 +1,19 @@
+Task 1:
+
+ Total words in vocab : 4745 + 3
+ The vocabulary is obtained by counting words in training and unlabeled set and discarding words that are which have a count <10.
+ and adding UNK + start tag + end tag
+
+ Along the way, try to identify some things you were making overcomplicated in your own preprocessing in previous assignments.
+ - we tried to remove special characters, convert all the words to lower case etc etc < fill here>
+ - the only preprocessing this does is to
+ 1. Discard words that are repeated less than 10 times,
+ 2. Add start and end
+ 3. Get indices of word in each sentence.
+
+Task 2:
+
+  The training loss decreases as the number of epoches incr. But Validation accuracy decreases as the epoches increase proving overfitting of data.
+
+Task 3:
+    Dropout seems to have helped and the overfitting isn't as much.

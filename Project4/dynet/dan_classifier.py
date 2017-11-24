@@ -7,11 +7,14 @@ import dynet_config
 dynet_config.set(random_seed=42, autobatch=1)
 
 import dynet as dy
+import matplotlib.pyplot as plt
+
+import numpy as np
 
 MAX_EPOCHS = 20
 BATCH_SIZE = 32
 HIDDEN_DIM = 32
-VOCAB_SIZE = __FIXME__
+VOCAB_SIZE = 4748
 
 
 def make_batches(data, batch_size):
@@ -55,6 +58,9 @@ class DANClassifier(object):
         for _, sent in batch:
 
             sent_embed = [dy.lookup(self.embed, w) for w in sent]
+            #print(sent_embed)
+            if train:
+                sent_embed = [dy.dropout(emb,0.5) for emb in sent_embed]
             sent_embed = dy.average(sent_embed)
 
             # hid = tanh(b + W * sent_embed)
@@ -87,11 +93,14 @@ class DANClassifier(object):
         probas = self._predict(sents, train=False)
         probas = [p.value() for p in probas]
         y_true = [y for y, _ in sents]
-
-        correct = 0
-
         # FIXME: count the number of correct predictions here
-
+        # correct = 0
+        y_pred = [p > 0.5 for p in probas]
+        correct = 0
+        for i in range(len(y_true)):
+            if y_true[i]==y_pred[i]:
+                correct+=1
+        #print(correct)
         return correct
 
 
@@ -129,15 +138,18 @@ if __name__ == '__main__':
             dy.renew_cg()
             valid_acc += clf.num_correct(batch)
 
-        valid_acc /= len(valid_ix)
-
+        valid_acc /= float(len(valid_ix))
         toc = clock()
 
+        t_loss=total_loss / float(len(train_ix))
         print(("Epoch {:3d} took {:3.1f}s. "
                "Train loss: {:8.5f} "
                "Valid accuracy: {:8.2f}").format(
             it,
             toc - tic,
-            total_loss / len(train_ix),
+            t_loss ,
             valid_acc * 100
             ))
+        plt.scatter(it,t_loss *100,c="green",label='Total Loss')
+        plt.scatter(it,valid_acc * 100,c="red", label='Validation Accuracy')
+    plt.show()

@@ -17,3 +17,8 @@ Task 2:
 
 Task 3:
     Dropout seems to have helped and the overfitting isn't as much.
+
+Task 4:
+    No back propogation in validation loss calculation - don't see anything else !
+
+Task 5: Values stored in lab.txt and u_lab.txt

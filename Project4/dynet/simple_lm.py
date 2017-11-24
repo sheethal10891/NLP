@@ -14,8 +14,8 @@ import dynet as dy
 MAX_EPOCHS = 20
 BATCH_SIZE = 32
 HIDDEN_DIM = 32
-USE_UNLABELED = False
-VOCAB_SIZE = __FIXME__
+USE_UNLABELED = True
+VOCAB_SIZE = 4748
 
 
 def make_batches(data, batch_size):
@@ -93,7 +93,9 @@ if __name__ == '__main__':
         train_ix = pickle.load(f)
 
     if USE_UNLABELED:
-        __FIXME__
+        with open(os.path.join('processed', 'unlab_ix.pkl'), 'rb') as f:
+            unlab_ix = pickle.load(f)
+        train_ix.extend(unlab_ix)
 
     with open(os.path.join('processed', 'valid_ix.pkl'), 'rb') as f:
         valid_ix = pickle.load(f)
@@ -108,7 +110,7 @@ if __name__ == '__main__':
 
     n_train_words = sum(len(sent) for _, sent in train_ix)
     n_valid_words = sum(len(sent) for _, sent in valid_ix)
-
+    val_loss=[]
     for it in range(MAX_EPOCHS):
         tic = clock()
 
@@ -138,9 +140,15 @@ if __name__ == '__main__':
             exp(total_loss / n_train_words),
             exp(valid_loss / n_valid_words)
             ))
+        val_loss.append(exp(valid_loss / n_valid_words))
+
+    f= open(os.path.join("processed", "u_lab.txt"), "wb")
+    for item in val_loss:
+        f.write("%s\n" % item)
+
 
     # FIXME: make sure to update filenames when implementing ngram models
-    fn = "embeds_baseline_lm"
+    fn = "embeds_baseline_lm_u"
     if USE_UNLABELED:
         fn += "_unlabeled"
 

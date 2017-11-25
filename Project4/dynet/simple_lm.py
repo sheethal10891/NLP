@@ -64,13 +64,15 @@ class SimpleNLM(object):
                 curr_word_ix = sent[i]
                 ct1 = dy.lookup(self.embed, prev_word_ix)
                 ctx = ct1
-                if self.n_word_context >= 2:
+                if self.n_word_context == 2:
                     prev_prev_word_ix = sent[i-2]
                     ct2 = dy.lookup(self.embed, prev_prev_word_ix)
                     ctx = dy.concatenate([ct1, ct2])
-                if self.n_word_context == 3:
+                elif self.n_word_context == 3:
                     prev_prev_prev_word_ix = sent[i-3]
                     ct3 = dy.lookup(self.embed, prev_prev_prev_word_ix)
+                    prev_prev_word_ix = sent[i-2]
+                    ct2 = dy.lookup(self.embed, prev_prev_word_ix)
                     ctx = dy.concatenate([ct1, ct2,ct3])
 
 

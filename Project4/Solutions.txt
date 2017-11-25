@@ -26,3 +26,5 @@ Task 5: Values stored in lab.txt and u_lab.txt
 
 Task 6:
     p word context = nXn*p dim for Whid
+    n*p dim for ck
+    All outputs going into lab<n>Task6.txt and u_lab<n>Task6.txt

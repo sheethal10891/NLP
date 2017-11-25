@@ -22,3 +22,7 @@ Task 4:
     No back propogation in validation loss calculation - don't see anything else !
 
 Task 5: Values stored in lab.txt and u_lab.txt
+
+
+Task 6:
+    p word context = nXn*p dim for Whid

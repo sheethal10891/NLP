@@ -15,6 +15,7 @@ MAX_EPOCHS = 20
 BATCH_SIZE = 32
 HIDDEN_DIM = 32
 USE_UNLABELED = True
+WCONTEXT = 2
 VOCAB_SIZE = 4748
 
 
@@ -36,13 +37,14 @@ def make_batches(data, batch_size):
 
 class SimpleNLM(object):
 
-    def __init__(self, params, vocab_size, hidden_dim):
+    def __init__(self, params, vocab_size, hidden_dim, n_word_context):
         self.vocab_size = vocab_size
         self.hidden_dim = hidden_dim
+        self.n_word_context = n_word_context
 
         self.embed = params.add_lookup_parameters((vocab_size, hidden_dim))
 
-        self.W_hid = params.add_parameters((hidden_dim, hidden_dim))
+        self.W_hid = params.add_parameters((hidden_dim, hidden_dim*n_word_context))
         self.b_hid = params.add_parameters((hidden_dim))
 
         self.W_out = params.add_parameters((vocab_size, hidden_dim))
@@ -57,11 +59,20 @@ class SimpleNLM(object):
 
         losses = []
         for _, sent in batch:
-            for i in range(1, len(sent)):
+            for i in range(self.n_word_context, len(sent)):
                 prev_word_ix = sent[i - 1]
                 curr_word_ix = sent[i]
+                ct1 = dy.lookup(self.embed, prev_word_ix)
+                ctx = ct1
+                if self.n_word_context >= 2:
+                    prev_prev_word_ix = sent[i-2]
+                    ct2 = dy.lookup(self.embed, prev_prev_word_ix)
+                    ctx = dy.concatenate([ct1, ct2])
+                if self.n_word_context == 3:
+                    prev_prev_prev_word_ix = sent[i-3]
+                    ct3 = dy.lookup(self.embed, prev_prev_prev_word_ix)
+                    ctx = dy.concatenate([ct1, ct2,ct3])
 
-                ctx = dy.lookup(self.embed, prev_word_ix)
 
                 # hid is the hidden layer output, size=hidden_size
                 # compute b_hid + W_hid * ctx, but faster
@@ -103,7 +114,7 @@ if __name__ == '__main__':
     # initialize dynet parameters and learning algorithm
     params = dy.ParameterCollection()
     trainer = dy.AdadeltaTrainer(params)
-    lm = SimpleNLM(params, vocab_size=VOCAB_SIZE, hidden_dim=HIDDEN_DIM)
+    lm = SimpleNLM(params, vocab_size=VOCAB_SIZE, hidden_dim=HIDDEN_DIM, n_word_context=WCONTEXT)
 
     train_batches = make_batches(train_ix, batch_size=BATCH_SIZE)
     valid_batches = make_batches(valid_ix, batch_size=BATCH_SIZE)
